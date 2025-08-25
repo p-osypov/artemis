@@ -1,0 +1,211 @@
+---
+description: CircuitMess Artemis sprite creation and usage patterns
+globs:
+  - "*.py"
+alwaysApply: false
+---
+
+# CircuitMess Artemis Sprite Development Guide
+
+This guide provides comprehensive examples and patterns for creating and using sprites in Artemis watch games.
+
+## Sprite Creation Approaches
+
+### 1. Pre-defined Byte Array Sprites (Most Reliable)
+
+The most reliable approach is using FrameBuffer with pre-defined byte arrays, as demonstrated in working games:
+
+```python
+from framebuf import FrameBuffer, RGB565
+
+# Example: alien2 sprite (19x21 pixels) - Working example from gyro game
+sprite_alien2 = FrameBuffer(bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x7F\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x5C\x85\x8E\x69\xCF\xF2\x86\x29\x5C\x45\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x55\x80\x86\x86\xB7\xEC\xCF\xF2\xAF\x8C\x7E\x46\x55\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x54\x63\x86\xA6\xAF\xCC\xCF\xF2\xAF\xCC\x86\xA5\x54\x63\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x54\x63\x86\xC5\xAF\xCB\xCF\xF2\xAF\xCB\x7E\xC5\x54\x63\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x54\x43\x7E\xA5\xA7\xEA\xB7\xED\x9F\xE8\x7E\xA4\x4C\x42\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x5D\x41\x7F\x23\xA7\xA9\xA7\xE9\x97\xE4\x7F\x42\x5D\x61\x00\x00'+
+b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x55\x80\x7F\xE0\x7F\xA1\x97\xC6\x97\xE5\x7F\xE0\x7F\xE0\x7F\xE0\x55\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x7F\xE0\x7F\xE0\x7F\xE0\x00\x00\x00\x00\x55\x80\x7F\xE0\x7F\xE0\x7F\xE0\x7F\xE0\x7F\xE0\x7F\xE0\x7F\xE0\x55\x80\x00\x00\x00\x00\x7F\xE0\x7F\xE0\x7F\xE0\x7F\xE0\x00\x00\x7F\xE0\x00\x00\x00\x00\x55\x80\x7F\xE0\xF8\x00\x7F\xE0\x7F\xE0\x7F\xE0\xF8\x00\x7F\xE0\x55\x80\x00\x00\x00\x00\x7F\xE0\x00\x00\x7F\xE0\x7F\xE0\x00\x00\x00\x00\x7F\xE0\x00\x00\x55\x80\x7F\xE0\xF8\x00\x7F\xE0\x7F\xE0\x7F\xE0\xF8\x00\x7F\xE0\x55\x80\x00\x00\x7F\xE0\x00\x00\x00\x00\x7F\xE0\x00\x00\x00\x00\x00\x00\x7F\xE0\x00\x00\x55\x80\x55\x80\x55\x80\x55\x80\x7F\xE0\x55\x80\x55\x80\x55\x80\x55\x80\x00\x00\x7F\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x7F\xE0\x00\x00\x44\x00\x7F\xE0\x00\x00\x7F\xE0\x7F\xE0\x7F\xE0\x00\x00\x7F\xE0\x44\x00\x00\x00\x7F\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x7F\xE0\x00\x00\x00\x00\x44\x00\x7F\xE0\x00\x00\x7F\xE0'+
+b'\x7F\xE0\x7F\xE0\x00\x00\x7F\xE0\x44\x00\x00\x00\x00\x00\x7F\xE0\x00\x00\x00\x00\x44\x00\x00\x00\x55\x80\x55\x80\x55\x80\x55\x80\x55\x80\x00\x00\x55\x80\x00\x00\x55\x80\x00\x00\x55\x80\x55\x80\x55\x80\x55\x80\x55\x80\x00\x00\x44\x00\x44\x00\x00\x00\x00\x00\x00\x00\x00\x00\x44\x00\x00\x00\x00\x00\x55\x80\x00\x00\x55\x80\x00\x00\x00\x00\x44\x00\x00\x00\x00\x00\x00\x00\x00\x00\x44\x00\x44\x00\x44\x00\x00\x00\x44\x00\x44\x00\x00\x00\x7F\xE0\x7F\xE0\x00\x00\x00\x00\x00\x00\x7F\xE0\x7F\xE0\x00\x00\x44\x00\x44\x00\x00\x00\x44\x00\x44\x00\x00\x00\x00\x00\x44\x00\x00\x00\x00\x00\x55\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x55\x80\x00\x00\x00\x00\x44\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x55\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x55\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x55\x80\x00\x00\x55\x80\x00\x00\x00\x00\x00\x00\x55\x80\x00\x00\x55\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'+
+b'\x00\x00\x00\x00\x7F\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x7F\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'), 19, 21, RGB565)
+sprite_alien2_transparent = 0
+
+# Usage: Draw the sprite with transparency
+display.blit(sprite_alien2, int(player_pos_x), int(player_pos_y), sprite_alien2_transparent)
+```
+
+### 2. Procedural Sprite Generation (Advanced)
+
+For dynamic content like asteroids, you can generate sprites programmatically:
+
+```python
+import math
+
+def rgb565(r, g, b):
+    return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
+
+def make_asteroid_fb(w=20, h=18):
+    # Background is 0 (use this as the transparent color when blitting)
+    data = bytearray(w * h * 2)
+
+    def setpx(x, y, color):
+        i = 2 * (y * w + x)
+        data[i] = (color >> 8) & 0xFF
+        data[i + 1] = color & 0xFF
+
+    # 4 brown/gray asteroid shades (dark -> light)
+    PALETTE = [
+        rgb565(40, 30, 25),    # darkest brown
+        rgb565(70, 50, 40),    # dark brown
+        rgb565(100, 70, 55),   # mid brown
+        rgb565(130, 95, 75)    # light brown highlight
+    ]
+
+    cx, cy = w // 2, h // 2
+    base_r = min(w, h) // 2 - 2
+
+    # build round asteroid with slight surface irregularity
+    for y in range(h):
+        for x in range(w):
+            dx, dy = x - cx, y - cy
+            r = math.sqrt(dx*dx + dy*dy)
+            ang = math.atan2(dy, dx)
+            
+            # Small surface bumps and dents for natural look
+            irregular = 0.8 * math.sin(7*ang) + 0.5 * math.sin(11*ang + 2.1)
+            radius = base_r + irregular
+            
+            if r <= radius:
+                # fake lighting from upper-left
+                nx, ny = (dx / (r + 1e-6)), (dy / (r + 1e-6))
+                lx, ly = -0.4, -0.9
+                lambert = max(0.0, -(nx*lx + ny*ly))  # 0..1
+                if lambert < 0.25: shade = 0
+                elif lambert < 0.50: shade = 1
+                elif lambert < 0.75: shade = 2
+                else: shade = 3
+                setpx(x, y, PALETTE[shade])
+            else:
+                setpx(x, y, 0)  # transparent background
+
+    # add some smaller craters
+    def darken_circle(cx0, cy0, rad, deep=1):
+        r2 = rad*rad
+        for yy in range(max(0, cy0-rad), min(h, cy0+rad+1)):
+            for xx in range(max(0, cx0-rad), min(w, cx0+rad+1)):
+                dx, dy = xx - cx0, yy - cy0
+                if dx*dx + dy*dy <= r2:
+                    i = 2 * (yy * w + xx)
+                    col = (data[i] << 8) | data[i+1]
+                    if col != 0:
+                        try:
+                            k = PALETTE.index(col)
+                        except ValueError:
+                            k = 1
+                        k = max(0, k - deep)
+                        newc = PALETTE[k]
+                        data[i]   = (newc >> 8) & 0xFF
+                        data[i+1] = newc & 0xFF
+
+    # Add small craters
+    darken_circle(cx-4, cy-3, 3, deep=2)
+    darken_circle(cx+3, cy-1, 2, deep=1)
+    darken_circle(cx-1, cy+4, 2, deep=2)
+
+    return FrameBuffer(data, w, h, RGB565)
+
+# Generate asteroid sprites
+sprite_asteroid1 = make_asteroid_fb(20, 18)
+sprite_asteroid2 = make_asteroid_fb(16, 16)
+sprite_asteroid3 = make_asteroid_fb(24, 22)
+ASTER_TRANSPARENT = 0
+
+# Usage: Draw procedural asteroid
+display.blit(sprite_asteroid1, int(asteroid_x), int(asteroid_y), ASTER_TRANSPARENT)
+```
+
+## Sprite Management Patterns
+
+### Multiple Sprite Variations
+
+```python
+# Create sprite collection with different sizes/types
+ASTEROID_SPRITES = [
+    {"sprite": make_asteroid_fb(20, 18), "transparent": 0, "w": 20, "h": 18},
+    {"sprite": make_asteroid_fb(16, 16), "transparent": 0, "w": 16, "h": 16},
+    {"sprite": make_asteroid_fb(24, 22), "transparent": 0, "w": 24, "h": 22},
+    {"sprite": make_asteroid_fb(14, 12), "transparent": 0, "w": 14, "h": 12},
+]
+
+# Usage: Random sprite selection
+def draw_asteroid(x, y, sprite_idx):
+    try:
+        asteroid_data = ASTEROID_SPRITES[sprite_idx]
+        sprite = asteroid_data["sprite"]
+        transparent = asteroid_data["transparent"]
+        display.blit(sprite, int(x), int(y), transparent)
+    except:
+        # Fallback to simple rectangle
+        display.rect(int(x), int(y), 12, 12, Display.Color.Gray, True)
+
+# In game loop
+sprite_idx = random.randint(0, len(ASTEROID_SPRITES) - 1)
+draw_asteroid(enemy_x, enemy_y, sprite_idx)
+```
+
+## Best Practices
+
+### 1. Performance Optimization
+- **Pre-generate sprites** at startup, not during gameplay
+- **Use appropriate sizes** - smaller sprites perform better
+- **Limit active sprites** - too many can slow down rendering
+
+### 2. Memory Management
+- **Reuse FrameBuffers** when possible
+- **Use transparency efficiently** - set transparent color to 0 for black backgrounds
+- **Consider sprite dimensions** for collision detection
+
+### 3. Visual Quality
+- **Use proper RGB565 encoding** for colors
+- **Include transparency** for clean rendering over backgrounds
+- **Test on actual hardware** - colors may appear different than on computer
+
+### 4. Error Handling
+- **Always include fallbacks** for sprite rendering failures
+- **Use try/except blocks** around display.blit() calls
+- **Provide simple rectangle alternatives** when sprites fail
+
+## Common Issues and Solutions
+
+### Issue: Sprites not displaying
+**Solution**: Check transparency color and ensure display.blit() is called with correct parameters
+
+### Issue: Performance problems
+**Solution**: Reduce sprite count, optimize sprite sizes, or use simpler drawing methods
+
+### Issue: Colors look wrong
+**Solution**: Verify RGB565 encoding and test color values on actual hardware
+
+### Issue: Memory errors
+**Solution**: Reduce sprite sizes or generate fewer sprites at startup
+
+## Integration with Game Loop
+
+```python
+# Efficient sprite rendering in main game loop
+while True:
+    buttons.scan()
+    
+    # Game logic updates
+    update_game_state()
+    
+    # Render everything
+    display.fill(0)  # Clear screen
+    
+    # Draw sprites efficiently
+    for enemy in enemies:
+        draw_asteroid(enemy["x"], enemy["y"], enemy["sprite_idx"])
+    
+    # Draw player sprite
+    display.blit(sprite_alien2, int(player_x), int(player_y), sprite_alien2_transparent)
+    
+    display.commit()  # Update display
+    time.sleep_ms(16)  # ~60 FPS
+```
+
+This sprite guide provides proven patterns for reliable sprite creation and usage in CircuitMess Artemis games.

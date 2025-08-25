@@ -1,0 +1,270 @@
+---
+description: CircuitMess Artemis smartwatch development guide for Python-based game and app development
+globs:
+  - "*.py"
+  - "*.artemis"
+alwaysApply: true
+---
+
+You are an expert Python developer specializing in CircuitMess Artemis smartwatch development. You have deep knowledge of embedded systems, game development, and the Artemis Python API.
+
+## CircuitMess Artemis Smartwatch Overview
+
+The CircuitMess Artemis is an educational DIY smartwatch with:
+- **Display**: 128x128 pixel color TFT LCD display
+- **Processor**: ESP32 microcontroller
+- **Sensors**: IMU (Inertial Measurement Unit) with accelerometer and gyroscope
+- **Input**: 4 buttons (Up, Down, Select, Back)
+- **Audio**: Piezo speaker for sound output
+- **Programming**: Python-based development via web IDE
+
+## Core Python Modules and API
+
+### Essential Imports
+```python
+from Artemis import *
+from framebuf import FrameBuffer, RGB565
+import time
+import random
+import math
+```
+
+### Main Components
+
+1. **Display System**
+   - Resolution: 128x128 pixels
+   - Color support: RGB565 format
+   - Key methods:
+     - `display.fill(color)` - Fill entire screen
+     - `display.rect(x, y, width, height, color, filled)` - Draw rectangle
+     - `display.text(text, x, y, color)` - Draw text
+     - `display.blit(sprite, x, y, transparent_color)` - Draw sprite/image
+     - `display.commit()` - Update screen (must be called to show changes)
+   - Colors: `Display.Color.White`, `Display.Color.Green`, etc.
+
+2. **IMU (Accelerometer/Gyroscope)**
+   - `imu.get_accel_x()` - Get X-axis acceleration (tilt left/right)
+   - `imu.get_accel_y()` - Get Y-axis acceleration (tilt forward/backward)
+   - `imu.get_accel_z()` - Get Z-axis acceleration (rotation/twist)
+   - **Motion Control Usage**:
+     - Values typically range from -1.0 to 1.0 for normal tilts
+     - Y-axis often needs negation: `y_accel = -imu.get_accel_y()` for intuitive control
+     - Multiply by speed factor for movement: `position += accel * speed`
+     - Use boundary constraints: `min(max(position + movement, 0), max_boundary)`
+   - **Common Pattern**: Read in separate function, calculate coordinates, apply constraints
+
+3. **Button Input**
+   - `buttons.scan()` - Must be called in main loop to detect button presses
+   - `buttons.on_press(button, callback_function)` - Register button callbacks
+   - Available buttons:
+     - `Buttons.Up` - Navigate up/move up in menus
+     - `Buttons.Down` - Navigate down/move down in menus
+     - `Buttons.Select` - Confirm selection/primary action button
+     - `Buttons.Back` - Go back/exit/reset (commonly used for game resets)
+
+4. **Sprite/Graphics**
+   - FrameBuffer for sprite creation with RGB565 format
+   - Sprites defined as byte arrays with width, height, and color format
+   - Transparency support via transparent color value
+   - Additional drawing methods:
+     - `display.ellipse(x, y, width, height, color, filled)` - Draw ellipse/circle
+   - **Note**: For detailed sprite examples and usage patterns, refer to the sprites rule documentation .cursor/rules/sprites.mdc
+
+5. **Audio System (Piezo Speaker)**
+   - `piezo.tone(frequency, duration)` - Play tone at specified frequency (Hz) for duration (ms)
+   - Common musical note frequencies: 523Hz (C), 587Hz (D), 659Hz (E), etc.
+   - Duration in milliseconds (e.g., 500 for half second)
+
+## Game Development Pattern
+
+### Standard Game Structure
+```python
+from Artemis import *
+from framebuf import FrameBuffer, RGB565
+import time
+import random
+
+# Initialize system
+begin()
+
+# Global game variables
+player_pos_x = 10
+player_pos_y = 30
+player_speed = 2
+x_accel = 0
+y_accel = 0
+game_over = False
+points = 0
+
+# Sprite definitions (if needed)
+sprite_data = FrameBuffer(bytearray(b'...'), width, height, RGB565)
+sprite_transparent_color = 0
+
+# Helper functions
+def draw_background():
+    display.fill(0)  # Black background
+
+def get_gyro_values():
+    global x_accel, y_accel
+    x_accel = imu.get_accel_x()
+    y_accel = -imu.get_accel_y()  # Negate for intuitive control
+
+def calculate_coordinates():
+    global player_pos_x, player_pos_y, x_accel, y_accel, player_speed
+    player_pos_x = round(min(max(player_pos_x + x_accel * player_speed, 0), 109))
+    player_pos_y = round(min(max(player_pos_y + y_accel * player_speed, 0), 107))
+
+def update_game_logic():
+    # Update positions, check collisions, etc.
+    pass
+
+def draw_game_elements():
+    # Draw all game objects
+    pass
+
+def check_collisions():
+    # Collision detection logic
+    pass
+
+# Button callbacks
+def reset_game():
+    global game_over, points
+    game_over = False
+    points = 0
+
+def move_up():
+    # Handle up button press
+    pass
+
+def move_down():
+    # Handle down button press
+    pass
+
+def select_action():
+    # Handle select button press
+    pass
+
+# Register button callbacks
+buttons.on_press(Buttons.Back, reset_game)
+buttons.on_press(Buttons.Up, move_up)
+buttons.on_press(Buttons.Down, move_down)
+buttons.on_press(Buttons.Select, select_action)
+
+# Main game loop
+while True:
+    buttons.scan()  # CRITICAL: Must be called every frame
+    
+    if not game_over:
+        get_gyro_values()      # Read IMU sensor data
+        calculate_coordinates() # Update player position based on tilt
+        update_game_logic()
+        check_collisions()
+    
+    draw_background()
+    draw_game_elements()
+    
+    if game_over:
+        display.text("Game Over", 30, 50, Display.Color.White)
+        display.text(f"Score: {points}", 30, 65, Display.Color.White)
+    
+    display.commit()  # CRITICAL: Must be called to update screen
+    time.sleep_ms(20)  # ~50 FPS
+```
+
+## Important Development Guidelines
+
+1. **Always call `begin()` at start** to initialize the system
+2. **Main loop must include**:
+   - `buttons.scan()` for input detection
+   - `display.commit()` to update screen
+   - `time.sleep_ms(20)` for frame rate control (~50 FPS)
+
+3. **Coordinate System**:
+   - Origin (0,0) is top-left corner
+   - X increases to the right (0-127)
+   - Y increases downward (0-127)
+
+4. **Performance Considerations**:
+   - Keep sprites small for better performance
+   - Minimize complex calculations in main loop
+   - Use integer math where possible
+
+5. **Motion Control with IMU**:
+   - **Reading Sensor Data**: Create dedicated function to read IMU values
+   - **Coordinate Calculation**: Separate function to update positions based on acceleration
+   - **Boundary Constraints**: Always constrain movement within screen bounds
+   - **Example Pattern**:
+     ```python
+     def get_gyro_values():
+         global x_accel, y_accel
+         x_accel = imu.get_accel_x()
+         y_accel = -imu.get_accel_y()  # Negate for intuitive control
+     
+     def calculate_coordinates():
+         global player_pos_x, player_pos_y, x_accel, y_accel, player_speed
+         player_pos_x = round(min(max(player_pos_x + x_accel * player_speed, 0), 109))
+         player_pos_y = round(min(max(player_pos_y + y_accel * player_speed, 0), 107))
+     ```
+   - **Tips**: Use `round()` for integer positions, account for sprite size in boundaries
+
+6. **Collision Detection**:
+   - Use simple rectangle-based collision
+   - Account for sprite dimensions when checking boundaries
+
+7. **Text Rendering**:
+   - Text coordinates specify top-left corner
+   - Default font is small, plan UI accordingly
+
+8. **Color Values**:
+   - Use predefined colors: `Display.Color.White`, `Display.Color.Green`, etc.
+   - Or use RGB565 color values (16-bit)
+   - Black = 0
+
+## Common Patterns and Best Practices
+
+1. **Game State Management**:
+   - Use global variables for game state
+   - Implement reset functions for button callbacks
+   - Track game_over state to control game flow
+
+2. **Obstacle/Enemy Patterns**:
+   - Reset position when moving off-screen
+   - Randomize parameters (position, size) for variety
+   - Increase speed/difficulty over time
+
+3. **Score System**:
+   - Display score continuously during gameplay
+   - Show final score on game over screen
+   - Increment points for achievements/milestones
+
+4. **User Feedback**:
+   - Always provide visual feedback for actions
+   - Display instructions on game over screen
+   - Use color effectively (limited palette)
+   - Use audio feedback with piezo speaker for enhanced user experience
+
+5. **Button Usage Patterns**:
+   - `Buttons.Up/Down` - Navigation, movement, menu selection
+   - `Buttons.Select` - Primary action, confirm, shoot, jump
+   - `Buttons.Back` - Exit, reset game, go to previous screen
+   - Avoid using `Buttons.Back` for gameplay actions - reserve for navigation
+
+## Debugging Tips
+
+1. Use `print()` statements for debugging (output visible in web IDE console)
+2. Test boundary conditions (screen edges, collision zones)
+3. Start with simple mechanics, add complexity gradually
+4. Ensure all global variables are properly initialized
+
+## Memory and Resource Constraints
+
+- Limited memory - avoid creating large arrays/buffers dynamically
+- Sprite data should be pre-computed when possible
+- Keep active game objects to reasonable numbers
+- Clean up unused resources
+
+When developing for Artemis, prioritize:
+1. Smooth gameplay (consistent frame rate)
+2. Intuitive controls (proper IMU calibration)
+3. Clear visual feedback
+4. Efficient resource usage
